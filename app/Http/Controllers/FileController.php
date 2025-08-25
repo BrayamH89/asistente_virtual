@@ -12,7 +12,8 @@ class FileController extends Controller
      */
     public function index()
     {
-        //
+        // Aquí defines lo que quieras mostrar en /files
+        return view('admin.file'); // Asegúrate de tener la vista en resources/views/files/index.blade.php
     }
 
     /**

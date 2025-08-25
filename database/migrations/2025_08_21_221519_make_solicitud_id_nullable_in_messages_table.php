@@ -9,19 +9,22 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->string('type')->default('mensaje'); // puede ser 'mensaje' o 'solicitud'
-            $table->string('status')->default('pendiente'); // pendiente, aceptada, rechazada
+            // Hacer solicitud_id nullable
+            $table->unsignedBigInteger('solicitud_id')->nullable()->change();
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->dropColumn(['type', 'status']);
+            // Revertir a NOT NULL en caso de rollback
+            $table->unsignedBigInteger('solicitud_id')->nullable(false)->change();
         });
     }
-
 };

@@ -1,7 +1,12 @@
-import './bootstrap';
+// resources/js/bootstrap.js o app.js
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js'; // O el driver que uses
 
-window.Echo.channel('solicitudes')
-    .listen('NuevaSolicitudAsesor', (data) => {
-        console.log('📢 Nueva solicitud recibida:', data);
-        alert('Nuevo asesor solicitado: ' + data.usuario);
-    });
+window.Pusher = Pusher;
+
+window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: import.meta.env.VITE_PUSHER_APP_KEY,
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    forceTLS: true
+});

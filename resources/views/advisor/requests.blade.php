@@ -1,21 +1,34 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h2>Solicitudes de Usuarios</h2>
+<div class="container py-4">
+    <h2 class="mb-4">📩 Solicitudes de usuarios</h2>
 
-    @foreach($requests as $request)
-        <div class="card mb-3 p-3">
-            <p><strong>Usuario:</strong> {{ $request->user->name }}</p>
-            <form action="{{ route('advisor.accept', $request->id) }}" method="POST" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn btn-success">Aceptar</button>
-            </form>
-            <form action="{{ route('advisor.reject', $request->id) }}" method="POST" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn btn-danger">Rechazar</button>
-            </form>
-        </div>
-    @endforeach
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($solicitudes as $solicitud)
+                <tr>
+                    <td>{{ $solicitud->guest_id }}</td>
+                    <td>
+                        <span class="badge bg-{{ $solicitud->estado == 'pendiente' ? 'warning' : 'success' }}">
+                            {{ ucfirst($solicitud->estado) }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ route('advisors.chat', $solicitud->id) }}" class="btn btn-sm btn-primary">
+                            Abrir chat
+                        </a>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 </div>
 @endsection

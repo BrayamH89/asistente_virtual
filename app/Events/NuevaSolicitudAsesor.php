@@ -2,33 +2,38 @@
 
 namespace App\Events;
 
-use App\Models\Message;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
+use App\Models\Solicitud;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Broadcasting\InteractsWithSockets;
 
 class NuevaSolicitudAsesor implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message;
-    public $asesorId;
+    public $solicitud;
 
-    public function __construct(Message $message, $asesorId)
+    public function __construct(Solicitud $solicitud)
     {
-        $this->message = $message;
-        $this->asesorId = $asesorId;
+        $this->solicitud = $solicitud;
     }
 
     public function broadcastOn()
     {
-        return new Channel("asesor.{$this->asesorId}");
+        return new PrivateChannel('asesor.' . $this->solicitud->asesor_id);
     }
 
-    public function broadcastAs()
+    public function broadcastWith()
     {
-        return 'nueva-solicitud';
+        return [
+            'solicitud' => [
+                'id' => $this->solicitud->id,
+                'guest_id' => $this->solicitud->guest_id,
+                'estado' => $this->solicitud->estado,
+                'mensaje' => $this->solicitud->mensaje ?? 'Sin mensaje inicial'
+            ]
+        ];
     }
 }

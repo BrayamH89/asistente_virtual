@@ -2,43 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\NuevaSolicitudAsesor;
-use App\Models\Message;
-use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Solicitud;
+use App\Models\Message;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class SolicitudController extends Controller
 {
-    /**
-     * Crear una solicitud de asesor desde el usuario o invitado.
-     */
     public function crear(Request $request)
     {
         $request->validate([
             'asesor_id' => 'required|exists:users,id',
-            'guest_id'  => 'required',
         ]);
 
-        // Buscar asesor
-        $asesorSeleccionado = User::where('role', 'asesor')
-            ->findOrFail($request->asesor_id);
+        $guestId = Auth::check() ? null : (session()->get('guest_id') ?? Str::uuid());
 
-        // Crear mensaje en base de datos
-        $message = Message::create([
-            'sender_id'   => $request->guest_id, // invitado o usuario autenticado
-            'receiver_id' => $asesorSeleccionado->id,
-            'content'     => 'Solicitud para hablar con un asesor',
-            'type'        => 'solicitud', // nuevo campo
-            'status'      => 'pendiente'
+        $solicitud = Solicitud::create([
+            'user_id' => Auth::id(),
+            'guest_id' => $guestId,
+            'asesor_id' => $request->asesor_id,
+            'estado' => 'pendiente',
         ]);
-
-        // Notificar en tiempo real
-        event(new NuevaSolicitudAsesor($message));
 
         return response()->json([
-            'message' => 'Solicitud enviada correctamente',
-            'data'    => $message
+            'success' => true,
+            'message' => 'Solicitud creada correctamente.',
+            'solicitud' => $solicitud
         ]);
     }
-
 }
