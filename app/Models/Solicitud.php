@@ -17,6 +17,8 @@ class Solicitud extends Model
         'asesor_id',
         'area_id',
         'estado',
+        'last_message_at',
+        'inactivity_prompt_sent',
         // 'mensaje' // Si tienes esta columna en tu tabla, añádela
     ];
 

@@ -4,135 +4,125 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Chat con Usuario</title>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.3/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <title>Chat con Usuario</title>
-
-    {{-- TailwindCSS y/o Bootstrap ya los cargas en layouts.app con Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        /* Contenedor del chat */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+
+        h3.chat-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         #chat-box {
             background: linear-gradient(to bottom, #fdfdfd, #f1f5f9);
             border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 18px;
+            border-radius: 12px;
+            padding: 16px;
+            height: 400px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 0.6rem;
+            gap: 10px;
             scroll-behavior: smooth;
-            overflow-y: auto;
         }
 
-        /* Scrollbar elegante */
-        #chat-box::-webkit-scrollbar {
-            width: 6px;
-        }
+        /* Scrollbar */
+        #chat-box::-webkit-scrollbar { width: 6px; }
         #chat-box::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 4px;
         }
-        #chat-box::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        #chat-box::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Burbuja base */
+        /* Burbujas base */
         .message-bubble {
             max-width: 75%;
-            padding: 12px 16px;
+            padding: 12px 18px;
             border-radius: 18px;
             font-size: 0.95rem;
             line-height: 1.5;
-            position: relative;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-            animation: fadeIn 0.3s ease-in-out;
             word-wrap: break-word;
-            transition: transform 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .message-bubble:hover {
-            transform: scale(1.02);
+            transform: scale(1.03);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
         }
 
-        /* Colita estilo chat */
-        .message-bubble::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            width: 0;
-            height: 0;
-            border: 8px solid transparent;
-        }
-
-        /* Mensajes del asesor */
-        .message-asesor-own {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: #fff;
-            border-bottom-right-radius: 6px;
-            margin-left: auto;
-        }
-        .message-asesor-own::after {
-            right: -8px;
-            border-left-color: #1d4ed8;
-        }
-
-        /* Mensajes del cliente */
-        .message-user-client {
-            background: #e5e7eb;
-            color: #111827;
-            border-bottom-left-radius: 6px;
-            margin-right: auto;
-        }
-        .message-user-client::after {
-            left: -8px;
-            border-right-color: #e5e7eb;
-        }
-
-        /* Mensajes de la IA */
-        .message-ia-client {
-            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-            color: #1e3a8a;
-            border-bottom-left-radius: 6px;
-            margin-right: auto;
-        }
-        .message-ia-client::after {
-            left: -8px;
-            border-right-color: #bfdbfe;
-        }
-
-        /* Etiqueta de remitente */
         .message-bubble strong {
             display: block;
             font-size: 0.8rem;
-            margin-bottom: 4px;
-            opacity: 0.9;
+            opacity: 0.85;
+            margin-bottom: 5px;
         }
 
-        /* Hora */
         .message-bubble small {
             display: block;
             font-size: 0.7rem;
-            opacity: 0.65;
+            opacity: 0.6;
             margin-top: 6px;
             text-align: right;
         }
 
-        /* Animación de entrada */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Asesor */
+        .message-asesor-own {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            margin-left: auto;
+            border-bottom-right-radius: 6px;
         }
 
-        /* Textarea más estilizada */
+        /* Usuario/Invitado */
+        .message-user-client {
+            background: #e5e7eb;
+            color: #111827;
+            margin-right: auto;
+            border-bottom-left-radius: 6px;
+        }
+
+        /* IA */
+        .message-ia-client {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1e3a8a;
+            margin-right: auto;
+            border-bottom-left-radius: 6px;
+        }
+
+        /* Textarea */
         #message-input {
             resize: none;
-            min-height: 52px;
-            max-height: 140px;
+            min-height: 50px;
+            max-height: 150px;
             border-radius: 12px;
-            transition: border 0.25s ease, box-shadow 0.25s ease;
             font-size: 0.95rem;
+            transition: border 0.25s ease, box-shadow 0.25s ease;
         }
 
         #message-input:focus {
@@ -141,13 +131,13 @@
             outline: none;
         }
 
-        /* Botón enviar */
+        /* Botón */
         #chat-form button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
             border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 600;
+            background: #2563eb;
+            color: white;
             transition: background 0.25s ease, transform 0.1s ease;
         }
 
@@ -156,21 +146,22 @@
             transform: translateY(-1px);
         }
 
-        #chat-form button:active {
-            transform: translateY(1px);
-        }
+        #chat-form button:active { transform: translateY(1px); }
 
+        @media (max-width: 768px) {
+            .chat-container { margin: 20px; padding: 16px; }
+            .message-bubble { max-width: 90%; }
+            #chat-form { flex-direction: column; gap: 10px; }
+        }
     </style>
 </head>
-<body class="bg-gray-100">
-
-    <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
-        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+<body>
+    <div class="chat-container">
+        <h3 class="chat-title">
             Chat con el usuario: {{ $solicitud->user->name ?? 'Invitado (' . $solicitud->guest_id . ')' }}
         </h3>
-        
-        {{-- Caja del chat --}}
-        <div id="chat-box" class="h-96 overflow-y-auto border border-gray-300 rounded-lg p-4 mb-4 bg-gray-50 flex flex-col space-y-2">
+
+        <div id="chat-box">
             @forelse($mensajes as $mensaje)
                 @php
                     $isAdvisorMessage = ($mensaje->sender_type === 'asesor');
@@ -185,9 +176,7 @@
                     <div class="message-bubble {{ $messageClass }}">
                         <strong>{{ $mensaje->getSenderLabelAttribute() }}:</strong>
                         <div>{{ $mensaje->contenido }}</div>
-                        <small class="text-xs text-right mt-1 block">
-                            {{ $mensaje->created_at->format('d/m/Y H:i') }}
-                        </small>
+                        <small>{{ $mensaje->created_at->format('d/m/Y H:i') }}</small>
                     </div>
                 </div>
             @empty
@@ -195,21 +184,17 @@
             @endforelse
         </div>
 
-        {{-- Formulario de envío --}}
-        <form id="chat-form" class="flex items-center space-x-2">
+        <form id="chat-form" class="mt-3 d-flex gap-2">
             @csrf
             <input type="hidden" name="solicitud_id" value="{{ $solicitud->id }}">
-            <textarea name="contenido" id="message-input"
-                class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            <textarea name="contenido" id="message-input" class="form-control flex-grow-1"
                 placeholder="Escribe tu mensaje..." required></textarea>
-            <button type="submit"
-                class="px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+            <button type="submit" class="btn">
                 Enviar
             </button>
         </form>
     </div>
 
-    {{-- Scripts --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const chatBox = document.getElementById('chat-box');
@@ -218,15 +203,11 @@
             const solicitudId = document.querySelector('input[name="solicitud_id"]').value;
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            const clienteUserId = {{ $clienteUserId ?? 'null' }};
-            const clienteGuestId = "{{ $clienteGuestId ?? 'null' }}";
-            const sessionId = "{{ $sessionId ?? 'null' }}";
-
             function addMessageToChat(message) {
                 const div = document.createElement('div');
                 const isAdvisorMessage = message.sender_type === 'asesor';
-
                 let messageClass = '';
+
                 if (isAdvisorMessage) messageClass = 'message-asesor-own';
                 else if (['user','guest'].includes(message.sender_type)) messageClass = 'message-user-client';
                 else if (message.sender_type === 'ia') messageClass = 'message-ia-client';
@@ -238,7 +219,7 @@
                 messageBubble.innerHTML = `
                     <strong>${message.sender_label}:</strong>
                     <div>${message.contenido}</div>
-                    <small class="text-xs text-right mt-1 block">${message.created_at}</small>
+                    <small>${message.created_at}</small>
                 `;
 
                 div.appendChild(messageBubble);
@@ -274,16 +255,6 @@
                     alert('Error de conexión.');
                 }
             });
-
-            if (clienteUserId) {
-                window.Echo.private(`chat.user.${clienteUserId}`)
-                    .listen('.new-message', (e) => addMessageToChat(e.message));
-            } else if (clienteGuestId !== 'null') {
-                window.Echo.private(`chat.guest.${clienteGuestId}`)
-                    .listen('.new-message', (e) => addMessageToChat(e.message));
-            }
-
-            chatBox.scrollTop = chatBox.scrollHeight;
         });
     </script>
 </body>

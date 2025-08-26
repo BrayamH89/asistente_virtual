@@ -9,6 +9,7 @@ use App\Http\Controllers\SolicitudController;
 use App\Http\Controllers\AdvisorPanelController; // Necesitamos este para el panel index
 use App\Http\Controllers\AdvisorController; // Este para las acciones de aceptar/rechazar/chat
 use App\Http\Middleware\AutenticacionMiddleware; // Tu middleware de autenticación
+use App\Http\Controllers\AdminPanelController; // Necesitamos este para el panel index
 
 /*
 |--------------------------------------------------------------------------
@@ -54,8 +55,25 @@ Route::middleware([AutenticacionMiddleware::class])->group(function () {
     // Actualmente, no tienes un middleware de rol activo en Kernel.php, pero si lo tuvieras, sería así:
     // Route::middleware('role:admin')->prefix('admin')->group(function () {
     Route::prefix('admin')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-        // Route::resource('/users', UserController::class); // Si users está dentro de admin, reubícalo
+        // Ruta principal del panel de administración
+        Route::get('/panelAdmin', [AdminPanelController::class, 'index'])->name('admin.dashboard'); // Para un dashboard general de admin
+
+        // Rutas para la gestión de archivos (usando FileController)
+        Route::resource('files', FileController::class)->except(['create', 'show', 'edit', 'update']);
+        Route::get('files/{file}/content', [FileController::class, 'showContent'])->name('files.content');
+        
+        // Si quieres que el AdminPanelController gestione la vista de archivos directamente,
+        // puedes tener esta ruta:
+        Route::get('files-panel', [AdminPanelController::class, 'filesIndex'])->name('admin.files.index');
+        // Esto es un enfoque alternativo si prefieres que AdminPanelController sea el "orquestador"
+        // y FileController solo maneje la lógica de base de datos.
+        // Definimos explícitamente la ruta POST para almacenar archivos
+        Route::post('files', [FileController::class, 'store'])->name('admin.files.store');
+        // Definimos explícitamente la ruta DELETE para eliminar archivos
+        Route::delete('files/{file}', [FileController::class, 'destroy'])->name('admin.files.destroy');
+        Route::get('/files/reprocess-all', [FileController::class, 'reprocessAll'])->name('files.reprocessAll');
+        Route::post('/files/{id}/update-content', [FileController::class, 'updateContent'])->name('files.updateContent');
+    
     });
 
 

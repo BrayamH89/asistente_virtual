@@ -13,7 +13,8 @@ class Message extends Model
         'user_id',       // Si está autenticado
         'solicitud_id',  // Relación con solicitudes de asesoría
         'contenido',     // Texto del mensaje
-        'sender_type'    // ESTO ES CRUCIAL: 'user', 'ia', 'asesor'
+        'sender_type' ,   // ESTO ES CRUCIAL: 'user', 'ia', 'asesor'
+        'last_message_at',
     ];
 
     public function solicitud(): BelongsTo

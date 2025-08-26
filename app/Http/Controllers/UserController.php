@@ -16,39 +16,8 @@ class UserController extends Controller
     }
 
     // Procesar login
-    // public function login(Request $request)
-    // {
-    //     $credentials = $request->validate([
-    //         'email' => ['required', 'email'],
-    //         'password' => ['required']
-    //     ]);
-
-    //     if (Auth::attempt($credentials)) {
-    //         $request->session()->regenerate();
-
-    //         $roleName = Auth::user()->role->name;
-
-    //         if ($roleName === 'administrador') {
-    //             return redirect()->route('admin.panel');
-    //         } elseif ($roleName === 'asesor') {
-    //             return redirect()->route('advisor.panel');
-    //         }
-
-    //         // Si no es ninguno, cerramos sesión
-    //         Auth::logout();
-    //         return redirect()->route('login')->withErrors([
-    //             'email' => 'No tienes permisos para acceder a esta área.',
-    //         ]);
-    //     }
-
-    //     return back()->withErrors([
-    //         'email' => 'Las credenciales no son correctas.',
-    //     ]);
-    // }
-
     public function login(Request $request)
     {
-        // dd($request);
         $validate = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
@@ -58,11 +27,11 @@ class UserController extends Controller
             if(Hash::check($request->password, $user->password)){
                 Auth::login($user);
                 $request->session()->regenerate();
-                switch($user->rol_id){
+                switch($user->role_id){ // <--- CAMBIO AQUÍ: de rol_id a role_id
                     case 1: // Administrador
-                        return redirect()->route('admin.panel');
-                    default: // Asesor
-                        return redirect()->route('advisor.panel');  
+                        return redirect()->route('admin.dashboard');
+                    default: // Asesor (o cualquier otro rol que no sea 1)
+                        return redirect()->route('advisor.panel');
                 }
             }else{
                 return back()->withErrors(['password' => 'Contraseña incorrecta']);
@@ -73,7 +42,6 @@ class UserController extends Controller
             ])->withInput();
         }
     }
-
 
     // Mostrar formulario de registro
     public function showRegisterForm()
@@ -88,14 +56,14 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|in:admin,asesor,usuario'
+            'role' => 'required|in:admin,asesor,usuario' // Note: This might need adjustment based on your role system
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role
+            'role' => $request->role // This should probably be 'role_id' and map to an integer
         ]);
 
         Auth::login($user);
